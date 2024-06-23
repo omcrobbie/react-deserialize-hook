@@ -1,18 +1,35 @@
+import * as babelPlugin from "prettier/parser-babel";
+import * as estreePlugin from "prettier/plugins/estree";
+import * as prettier from "prettier/standalone";
 import { useEffect, useMemo, useState } from "react";
 import { renderToString } from "react-dom/server";
 import { deserialize } from "./serialize";
 
 export const useSerializedComponents = (serialized?: string) => {
   const [jsxString, setJsxString] = useState<string>();
-  const deserialized = useMemo(() => {
+  const { element, name } = useMemo(() => {
     if (serialized) {
       return deserialize(serialized);
     }
+    return { element: undefined, name: undefined };
   }, [serialized]);
-  const Tree = useMemo(() => () => <>{deserialized}</>, [deserialized]);
+  const Tree = useMemo(() => () => <>{element}</>, [element]);
   useEffect(() => {
-    const str = renderToString(<Tree />);
-    setJsxString(window.convert(str));
-  }, [Tree]);
+    if (Tree && name) {
+      const str = renderToString(<Tree />);
+      //@ts-expect-error: browserify method on window object
+      const body = window.convert(str);
+      addHeadername(name, body).then(setJsxString);
+    }
+  }, [Tree, name]);
   return { jsxString, Tree };
 };
+
+function addHeadername(name: string, body: string) {
+  const str = `export function ${name}() { return (${body})}`;
+  return prettier.format(str, {
+    parser: "babel",
+    bracketSameLine: true,
+    plugins: [babelPlugin, estreePlugin],
+  });
+}

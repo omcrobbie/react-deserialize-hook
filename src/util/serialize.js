@@ -31,12 +31,15 @@ export function serialize(element) {
  * @param {function?} options.reviver
  * @returns {ReactNode}
  */
+
+let compName = undefined;
 export function deserialize(data, options = {}) {
+  compName = undefined;
   if (typeof data === "string") {
     data = JSON.parse(data);
   }
   if (data instanceof Object) {
-    return deserializeElement(data, options);
+    return { element: deserializeElement(data, options), name: compName };
   }
   throw new Error("Deserialization error: incorrect data type");
 }
@@ -57,10 +60,10 @@ function deserializeElement(element, options = {}, key) {
   }
 
   // Now element has following shape { type: string, props: object }
-  console.log(element);
   let { type, props } = element;
   if (typeof type !== "string") {
     type = Component;
+    compName = props.name;
   } else {
     type = components[type] || type.toLowerCase();
   }
