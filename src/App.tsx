@@ -10,24 +10,20 @@ export default function App() {
       serialize(
         <Component
           name="Test1"
-          type="Component"
           className="container"
           style={{ border: "solid 1px blue", backgroundColor: "red" }}
         >
           <h1 align="center">
-            <Component
-              name="Test2"
-              type="Component"
-              style={{ border: "solid 1px red", backgroundColor: "blue" }}
-            >
+            <div style={{ border: "solid 1px red", backgroundColor: "blue" }}>
               Test
-            </Component>
+            </div>
           </h1>
         </Component>
       )
     );
   }, []);
-  const { Tree } = useSerializedComponents(serialized);
+  const { Tree, jsxString } = useSerializedComponents(serialized);
+  console.log(jsxString);
 
   return <Tree />;
 }

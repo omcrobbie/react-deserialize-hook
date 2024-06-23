@@ -1,4 +1,5 @@
 import React from "react";
+import Component from "../components/Component";
 /**
  * Serialize React element to JSON string
  *
@@ -59,11 +60,7 @@ function deserializeElement(element, options = {}, key) {
   console.log(element);
   let { type, props } = element;
   if (typeof type !== "string") {
-    const path = "../components/" + props.type;
-    if (path) {
-      type = React.lazy(() => import(/* @vite-ignore */ path));
-    }
-    delete props.type;
+    type = Component;
   } else {
     type = components[type] || type.toLowerCase();
   }

@@ -1,5 +1,5 @@
-import { Suspense, useEffect, useMemo, useState } from "react";
-import renderToString from "./renderToString";
+import { useEffect, useMemo, useState } from "react";
+import { renderToString } from "react-dom/server";
 import { deserialize } from "./serialize";
 
 export const useSerializedComponents = (serialized?: string) => {
@@ -9,12 +9,10 @@ export const useSerializedComponents = (serialized?: string) => {
       return deserialize(serialized);
     }
   }, [serialized]);
-  const Tree = useMemo(
-    () => () => <Suspense>{deserialized}</Suspense>,
-    [deserialized]
-  );
+  const Tree = useMemo(() => () => <>{deserialized}</>, [deserialized]);
   useEffect(() => {
-    renderToString(<Tree />).then((val) => setJsxString(val));
+    const str = renderToString(<Tree />);
+    setJsxString(window.convert(str));
   }, [Tree]);
   return { jsxString, Tree };
 };
